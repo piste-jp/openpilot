@@ -21,6 +21,10 @@ ALERT_BORDER_RADIUS = 30
 ALERT_FONT_SMALL = 66
 ALERT_FONT_MEDIUM = 74
 ALERT_FONT_BIG = 88
+DASHCAM_BADGE_FONT = 28
+DASHCAM_BADGE_PADDING_X = 16
+DASHCAM_BADGE_PADDING_Y = 10
+DASHCAM_BADGE_MARGIN = 28
 
 ALERT_HEIGHTS = {
   AlertSize.small: 271,
@@ -119,6 +123,10 @@ class AlertRenderer(Widget):
     if not alert:
       return
 
+    if self._is_dashcam_alert(alert):
+      self._draw_dashcam_badge(rect, alert.text1)
+      return
+
     alert_rect = self._get_alert_rect(rect, alert.size)
     self._draw_background(alert_rect, alert)
 
@@ -129,6 +137,29 @@ class AlertRenderer(Widget):
       alert_rect.height - 2 * ALERT_PADDING
     )
     self._draw_text(text_rect, alert)
+
+  def _is_dashcam_alert(self, alert: Alert) -> bool:
+    return "dashcam" in alert.text1.lower()
+
+  def _draw_dashcam_badge(self, rect: rl.Rectangle, text: str) -> None:
+    text_size = measure_text_cached(self.font_bold, text, DASHCAM_BADGE_FONT)
+    badge_w = text_size.x + DASHCAM_BADGE_PADDING_X * 2
+    badge_h = text_size.y + DASHCAM_BADGE_PADDING_Y * 2
+    x = rect.x + rect.width - badge_w - DASHCAM_BADGE_MARGIN
+    y = rect.y + rect.height - badge_h - DASHCAM_BADGE_MARGIN
+
+    badge_rect = rl.Rectangle(x, y, badge_w, badge_h)
+    roundness = ALERT_BORDER_RADIUS / (min(badge_rect.width, badge_rect.height) / 2)
+    rl.draw_rectangle_rounded(badge_rect, roundness, 8, ALERT_COLORS[AlertStatus.normal])
+
+    rl.draw_text_ex(
+      self.font_bold,
+      text,
+      rl.Vector2(x + DASHCAM_BADGE_PADDING_X, y + DASHCAM_BADGE_PADDING_Y),
+      DASHCAM_BADGE_FONT,
+      0,
+      rl.WHITE,
+    )
 
   def _get_alert_rect(self, rect: rl.Rectangle, size: int) -> rl.Rectangle:
     if size == AlertSize.full:
