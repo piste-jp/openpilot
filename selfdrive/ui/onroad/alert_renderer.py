@@ -174,7 +174,7 @@ class AlertRenderer(Widget):
   def _draw_gear_badge(self, rect: rl.Rectangle) -> None:
     if ui_state.sm.recv_frame['carState'] < ui_state.started_frame:
       return
-    gear_step = getattr(ui_state.sm['carState'], 'gearStep', -1)
+    gear_step = ui_state.sm['carState'].gearStep
     if gear_step < 1:
       return
 
