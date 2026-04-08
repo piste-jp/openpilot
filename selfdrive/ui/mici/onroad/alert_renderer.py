@@ -284,9 +284,6 @@ class AlertRenderer(Widget):
     if ui_state.sm.recv_frame['carState'] < ui_state.started_frame:
       return
     gear_step = ui_state.sm['carState'].gearStep
-    if gear_step < 1:
-      return
-
     text = str(gear_step)
     text_size = measure_text_cached(self._font_bold, text, GEAR_BADGE_FONT)
     badge_w = text_size.x + GEAR_BADGE_PADDING_X * 2
