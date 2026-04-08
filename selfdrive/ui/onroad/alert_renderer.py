@@ -124,7 +124,8 @@ class AlertRenderer(Widget):
       return
 
     if self._is_dashcam_alert(alert):
-      self._draw_dashcam_badge(rect, alert.text1)
+      # Suppress the dashcam label on comma 4 so only the camera view is shown.
+      # self._draw_dashcam_badge(rect, alert.text1)
       return
 
     alert_rect = self._get_alert_rect(rect, alert.size)
