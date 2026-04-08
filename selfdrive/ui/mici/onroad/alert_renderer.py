@@ -34,10 +34,11 @@ ALERT_COLORS = {
 
 TURN_SIGNAL_BLINK_PERIOD = 1 / (80 / 60)  # Mazda heartbeat turn signal BPM
 
-DASHCAM_BADGE_FONT = 56
-DASHCAM_BADGE_PADDING_X = 24
-DASHCAM_BADGE_PADDING_Y = 14
+DASHCAM_BADGE_FONT = 36
+DASHCAM_BADGE_PADDING_X = 16
+DASHCAM_BADGE_PADDING_Y = 10
 DASHCAM_BADGE_MARGIN = 28
+DASHCAM_BADGE_TEXT_COLOR = rl.Color(160, 160, 160, 255)
 
 GEAR_BADGE_FONT = 72
 GEAR_BADGE_PADDING_X = 28
@@ -277,13 +278,16 @@ class AlertRenderer(Widget):
       rl.Vector2(x + DASHCAM_BADGE_PADDING_X, y + DASHCAM_BADGE_PADDING_Y),
       DASHCAM_BADGE_FONT,
       0,
-      rl.WHITE,
+      DASHCAM_BADGE_TEXT_COLOR,
     )
 
   def _draw_gear_badge(self, rect: rl.Rectangle) -> None:
     if ui_state.sm.recv_frame['carState'] < ui_state.started_frame:
       return
     gear_step = ui_state.sm['carState'].gearStep
+    if gear_step < 1:
+      return
+
     text = str(gear_step)
     text_size = measure_text_cached(self._font_bold, text, GEAR_BADGE_FONT)
     badge_w = text_size.x + GEAR_BADGE_PADDING_X * 2
