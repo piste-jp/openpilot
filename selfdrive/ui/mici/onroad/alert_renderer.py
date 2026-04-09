@@ -10,6 +10,7 @@ from openpilot.selfdrive.ui.ui_state import ui_state
 from openpilot.common.filter_simple import BounceFilter, FirstOrderFilter
 from openpilot.system.hardware import TICI
 from openpilot.system.ui.lib.application import gui_app, FontWeight
+from openpilot.system.ui.lib.text_measure import measure_text_cached
 from openpilot.system.ui.widgets import Widget
 from openpilot.system.ui.widgets.label import UnifiedLabel
 
@@ -32,6 +33,11 @@ ALERT_COLORS = {
 }
 
 TURN_SIGNAL_BLINK_PERIOD = 1 / (80 / 60)  # Mazda heartbeat turn signal BPM
+
+GEAR_BADGE_FONT = 72
+GEAR_BADGE_PADDING_X = 28
+GEAR_BADGE_PADDING_Y = 16
+GEAR_BADGE_MARGIN = 28
 
 DEBUG = False
 
@@ -107,6 +113,8 @@ class AlertRenderer(Widget):
     self._turn_signal_timer = 0.0
     self._turn_signal_alpha_filter = FirstOrderFilter(0.0, 0.3, 1 / gui_app.target_fps)
     self._last_icon_side: IconSide | None = None
+
+    self._font_bold: rl.Font = gui_app.font(FontWeight.BOLD)
 
     self._load_icons()
 
@@ -216,6 +224,8 @@ class AlertRenderer(Widget):
     return AlertLayout(text_rect, icon_layout)
 
   def _render(self, rect: rl.Rectangle) -> bool:
+    self._draw_gear_badge(rect)
+
     alert = self.get_alert(ui_state.sm)
 
     # Animate fade and slide in/out
@@ -237,6 +247,31 @@ class AlertRenderer(Widget):
     self._draw_icons(alert_layout)
 
     return True
+
+  def _draw_gear_badge(self, rect: rl.Rectangle) -> None:
+    if ui_state.sm.recv_frame['carState'] < ui_state.started_frame:
+      return
+    gear_step = ui_state.sm['carState'].gearStep
+    if gear_step < 1:
+      return
+
+    text = str(gear_step)
+    text_size = measure_text_cached(self._font_bold, text, GEAR_BADGE_FONT)
+    badge_w = text_size.x + GEAR_BADGE_PADDING_X * 2
+    badge_h = text_size.y + GEAR_BADGE_PADDING_Y * 2
+    x = rect.x + rect.width - badge_w - GEAR_BADGE_MARGIN
+    y = rect.y + rect.height - badge_h - GEAR_BADGE_MARGIN
+
+    badge_rect = rl.Rectangle(x, y, badge_w, badge_h)
+    rl.draw_rectangle_rounded(badge_rect, 0.35, 8, ALERT_COLORS[AlertStatus.normal])
+    rl.draw_text_ex(
+      self._font_bold,
+      text,
+      rl.Vector2(x + GEAR_BADGE_PADDING_X, y + GEAR_BADGE_PADDING_Y),
+      GEAR_BADGE_FONT,
+      0,
+      rl.WHITE,
+    )
 
   def _draw_icons(self, alert_layout: AlertLayout) -> None:
     if alert_layout.icon is None:
