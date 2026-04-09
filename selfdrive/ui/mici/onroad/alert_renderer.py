@@ -10,6 +10,7 @@ from openpilot.selfdrive.ui.ui_state import ui_state
 from openpilot.common.filter_simple import BounceFilter, FirstOrderFilter
 from openpilot.system.hardware import TICI
 from openpilot.system.ui.lib.application import gui_app, FontWeight
+from openpilot.system.ui.lib.text_measure import measure_text_cached
 from openpilot.system.ui.widgets import Widget
 from openpilot.system.ui.widgets.label import UnifiedLabel
 
@@ -32,6 +33,12 @@ ALERT_COLORS = {
 }
 
 TURN_SIGNAL_BLINK_PERIOD = 1 / (80 / 60)  # Mazda heartbeat turn signal BPM
+
+DASHCAM_BADGE_FONT = 36
+DASHCAM_BADGE_PADDING_X = 16
+DASHCAM_BADGE_PADDING_Y = 10
+DASHCAM_BADGE_MARGIN = 28
+DASHCAM_BADGE_TEXT_COLOR = rl.Color(160, 160, 160, 255)
 
 DEBUG = False
 
@@ -107,6 +114,8 @@ class AlertRenderer(Widget):
     self._turn_signal_timer = 0.0
     self._turn_signal_alpha_filter = FirstOrderFilter(0.0, 0.3, 1 / gui_app.target_fps)
     self._last_icon_side: IconSide | None = None
+
+    self._font_bold: rl.Font = gui_app.font(FontWeight.BOLD)
 
     self._load_icons()
 
@@ -230,6 +239,11 @@ class AlertRenderer(Widget):
         self._prev_alert = None
         return False
 
+    if self._is_dashcam_alert(alert):
+      # Replace the dashcam alert text with a compact "D" badge in the top-right corner.
+      self._draw_dashcam_badge(rect)
+      return True
+
     self._draw_background(alert)
 
     alert_layout = self._icon_helper(alert)
@@ -237,6 +251,28 @@ class AlertRenderer(Widget):
     self._draw_icons(alert_layout)
 
     return True
+
+  def _is_dashcam_alert(self, alert: Alert) -> bool:
+    return "dashcam" in alert.text1.lower()
+
+  def _draw_dashcam_badge(self, rect: rl.Rectangle) -> None:
+    text = "D"
+    text_size = measure_text_cached(self._font_bold, text, DASHCAM_BADGE_FONT)
+    badge_w = text_size.x + DASHCAM_BADGE_PADDING_X * 2
+    badge_h = text_size.y + DASHCAM_BADGE_PADDING_Y * 2
+    x = rect.x + rect.width - badge_w - DASHCAM_BADGE_MARGIN
+    y = rect.y + DASHCAM_BADGE_MARGIN
+
+    badge_rect = rl.Rectangle(x, y, badge_w, badge_h)
+    rl.draw_rectangle_rounded(badge_rect, 0.35, 8, ALERT_COLORS[AlertStatus.normal])
+    rl.draw_text_ex(
+      self._font_bold,
+      text,
+      rl.Vector2(x + DASHCAM_BADGE_PADDING_X, y + DASHCAM_BADGE_PADDING_Y),
+      DASHCAM_BADGE_FONT,
+      0,
+      DASHCAM_BADGE_TEXT_COLOR,
+    )
 
   def _draw_icons(self, alert_layout: AlertLayout) -> None:
     if alert_layout.icon is None:
