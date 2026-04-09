@@ -34,6 +34,12 @@ ALERT_COLORS = {
 
 TURN_SIGNAL_BLINK_PERIOD = 1 / (80 / 60)  # Mazda heartbeat turn signal BPM
 
+DASHCAM_BADGE_FONT = 36
+DASHCAM_BADGE_PADDING_X = 16
+DASHCAM_BADGE_PADDING_Y = 10
+DASHCAM_BADGE_MARGIN = 28
+DASHCAM_BADGE_TEXT_COLOR = rl.Color(160, 160, 160, 255)
+
 GEAR_BADGE_FONT = 72
 GEAR_BADGE_PADDING_X = 28
 GEAR_BADGE_PADDING_Y = 16
@@ -240,6 +246,11 @@ class AlertRenderer(Widget):
         self._prev_alert = None
         return False
 
+    if self._is_dashcam_alert(alert):
+      # Replace the dashcam alert text with a compact "D" badge in the top-right corner.
+      self._draw_dashcam_badge(rect)
+      return True
+
     self._draw_background(alert)
 
     alert_layout = self._icon_helper(alert)
@@ -247,6 +258,28 @@ class AlertRenderer(Widget):
     self._draw_icons(alert_layout)
 
     return True
+
+  def _is_dashcam_alert(self, alert: Alert) -> bool:
+    return "dashcam" in alert.text1.lower()
+
+  def _draw_dashcam_badge(self, rect: rl.Rectangle) -> None:
+    text = "D"
+    text_size = measure_text_cached(self._font_bold, text, DASHCAM_BADGE_FONT)
+    badge_w = text_size.x + DASHCAM_BADGE_PADDING_X * 2
+    badge_h = text_size.y + DASHCAM_BADGE_PADDING_Y * 2
+    x = rect.x + rect.width - badge_w - DASHCAM_BADGE_MARGIN
+    y = rect.y + DASHCAM_BADGE_MARGIN
+
+    badge_rect = rl.Rectangle(x, y, badge_w, badge_h)
+    rl.draw_rectangle_rounded(badge_rect, 0.35, 8, ALERT_COLORS[AlertStatus.normal])
+    rl.draw_text_ex(
+      self._font_bold,
+      text,
+      rl.Vector2(x + DASHCAM_BADGE_PADDING_X, y + DASHCAM_BADGE_PADDING_Y),
+      DASHCAM_BADGE_FONT,
+      0,
+      DASHCAM_BADGE_TEXT_COLOR,
+    )
 
   def _draw_gear_badge(self, rect: rl.Rectangle) -> None:
     if ui_state.sm.recv_frame['carState'] < ui_state.started_frame:
