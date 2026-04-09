@@ -44,6 +44,7 @@ GEAR_BADGE_FONT = 72
 GEAR_BADGE_PADDING_X = 28
 GEAR_BADGE_PADDING_Y = 16
 GEAR_BADGE_MARGIN = 28
+GEAR_BADGE_TEXT_COLOR = rl.Color(160, 160, 160, 255)
 
 DEBUG = False
 
@@ -247,8 +248,8 @@ class AlertRenderer(Widget):
         return False
 
     if self._is_dashcam_alert(alert):
-      # Replace the dashcam alert text with a compact "D" badge in the top-right corner.
-      self._draw_dashcam_badge(rect)
+      # Replace the dashcam alert with a compact badge in the bottom-right corner.
+      self._draw_dashcam_badge(rect, alert)
       return True
 
     self._draw_background(alert)
@@ -262,13 +263,13 @@ class AlertRenderer(Widget):
   def _is_dashcam_alert(self, alert: Alert) -> bool:
     return "dashcam" in alert.text1.lower()
 
-  def _draw_dashcam_badge(self, rect: rl.Rectangle) -> None:
-    text = "D"
+  def _draw_dashcam_badge(self, rect: rl.Rectangle, alert: Alert) -> None:
+    text = alert.text1.lower()
     text_size = measure_text_cached(self._font_bold, text, DASHCAM_BADGE_FONT)
     badge_w = text_size.x + DASHCAM_BADGE_PADDING_X * 2
     badge_h = text_size.y + DASHCAM_BADGE_PADDING_Y * 2
     x = rect.x + rect.width - badge_w - DASHCAM_BADGE_MARGIN
-    y = rect.y + DASHCAM_BADGE_MARGIN
+    y = rect.y + rect.height - badge_h - DASHCAM_BADGE_MARGIN
 
     badge_rect = rl.Rectangle(x, y, badge_w, badge_h)
     rl.draw_rectangle_rounded(badge_rect, 0.35, 8, ALERT_COLORS[AlertStatus.normal])
@@ -293,7 +294,7 @@ class AlertRenderer(Widget):
     badge_w = text_size.x + GEAR_BADGE_PADDING_X * 2
     badge_h = text_size.y + GEAR_BADGE_PADDING_Y * 2
     x = rect.x + rect.width - badge_w - GEAR_BADGE_MARGIN
-    y = rect.y + rect.height - badge_h - GEAR_BADGE_MARGIN
+    y = rect.y + GEAR_BADGE_MARGIN
 
     badge_rect = rl.Rectangle(x, y, badge_w, badge_h)
     rl.draw_rectangle_rounded(badge_rect, 0.35, 8, ALERT_COLORS[AlertStatus.normal])
@@ -303,7 +304,7 @@ class AlertRenderer(Widget):
       rl.Vector2(x + GEAR_BADGE_PADDING_X, y + GEAR_BADGE_PADDING_Y),
       GEAR_BADGE_FONT,
       0,
-      rl.WHITE,
+      GEAR_BADGE_TEXT_COLOR,
     )
 
   def _draw_icons(self, alert_layout: AlertLayout) -> None:
