@@ -40,11 +40,12 @@ DASHCAM_BADGE_PADDING_Y = 10
 DASHCAM_BADGE_MARGIN = 28
 DASHCAM_BADGE_TEXT_COLOR = rl.Color(160, 160, 160, 255)
 
-GEAR_BADGE_FONT = 72
-GEAR_BADGE_PADDING_X = 28
-GEAR_BADGE_PADDING_Y = 16
+GEAR_BADGE_FONT = 48
+GEAR_BADGE_PADDING_X = 16
+GEAR_BADGE_PADDING_Y = 10
 GEAR_BADGE_MARGIN = 28
-GEAR_BADGE_TEXT_COLOR = rl.Color(160, 160, 160, 255)
+GEAR_BADGE_TEXT_COLOR = rl.Color(120, 120, 120, 255)
+GEAR_BADGE_BG_COLOR = rl.Color(0, 0, 0, 160)
 
 DEBUG = False
 
@@ -297,7 +298,7 @@ class AlertRenderer(Widget):
     y = rect.y + GEAR_BADGE_MARGIN
 
     badge_rect = rl.Rectangle(x, y, badge_w, badge_h)
-    rl.draw_rectangle_rounded(badge_rect, 0.35, 8, ALERT_COLORS[AlertStatus.normal])
+    rl.draw_rectangle_rounded(badge_rect, 0.35, 8, GEAR_BADGE_BG_COLOR)
     rl.draw_text_ex(
       self._font_bold,
       text,
