@@ -40,12 +40,15 @@ DASHCAM_BADGE_PADDING_Y = 10
 DASHCAM_BADGE_MARGIN = 28
 DASHCAM_BADGE_TEXT_COLOR = rl.Color(160, 160, 160, 255)
 
-GEAR_BADGE_FONT = 48
-GEAR_BADGE_PADDING_X = 16
-GEAR_BADGE_PADDING_Y = 10
+GEAR_BADGE_FONT = 96
+GEAR_BADGE_PADDING_X = 28
+GEAR_BADGE_PADDING_Y = 16
 GEAR_BADGE_MARGIN = 28
-GEAR_BADGE_TEXT_COLOR = rl.Color(150, 150, 150, 255)
+GEAR_BADGE_TEXT_COLOR = rl.Color(220, 220, 220, 255)
 GEAR_BADGE_BG_COLOR = rl.Color(0, 0, 0, 120)
+GEAR_BADGE_BRAKE_BG_COLOR = rl.Color(200, 0, 0, 180)
+# Raw BRAKE_PRESSURE idle is ~152; treat > 155 as active brake.
+GEAR_BADGE_BRAKE_THRESHOLD = 155
 
 DEBUG = False
 
@@ -286,8 +289,9 @@ class AlertRenderer(Widget):
   def _draw_gear_badge(self, rect: rl.Rectangle) -> None:
     if ui_state.sm.recv_frame['carState'] < ui_state.started_frame:
       return
-    gear_step = ui_state.sm['carState'].gearStep
-    if gear_step < 1:
+    cs = ui_state.sm['carState']
+    gear_step = cs.gearStep
+    if gear_step < 1 or gear_step > 6:
       return
 
     text = str(gear_step)
@@ -295,10 +299,13 @@ class AlertRenderer(Widget):
     badge_w = text_size.x + GEAR_BADGE_PADDING_X * 2
     badge_h = text_size.y + GEAR_BADGE_PADDING_Y * 2
     x = rect.x + rect.width - badge_w - GEAR_BADGE_MARGIN
-    y = rect.y + GEAR_BADGE_MARGIN
+    y = rect.y + rect.height - badge_h - GEAR_BADGE_MARGIN
+
+    brake_on = cs.brakePressed or cs.brake > GEAR_BADGE_BRAKE_THRESHOLD
+    bg_color = GEAR_BADGE_BRAKE_BG_COLOR if brake_on else GEAR_BADGE_BG_COLOR
 
     badge_rect = rl.Rectangle(x, y, badge_w, badge_h)
-    rl.draw_rectangle_rounded(badge_rect, 0.35, 8, GEAR_BADGE_BG_COLOR)
+    rl.draw_rectangle_rounded(badge_rect, 0.35, 8, bg_color)
     rl.draw_text_ex(
       self._font_bold,
       text,
