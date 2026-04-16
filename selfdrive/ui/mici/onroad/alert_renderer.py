@@ -47,8 +47,6 @@ GEAR_BADGE_MARGIN = 28
 GEAR_BADGE_TEXT_COLOR = rl.Color(220, 220, 220, 255)
 GEAR_BADGE_BG_COLOR = rl.Color(0, 0, 0, 120)
 GEAR_BADGE_BRAKE_BG_COLOR = rl.Color(200, 0, 0, 180)
-# Raw BRAKE_PRESSURE idle is ~152; treat > 155 as active brake.
-GEAR_BADGE_BRAKE_THRESHOLD = 155
 
 DEBUG = False
 
@@ -301,8 +299,7 @@ class AlertRenderer(Widget):
     x = rect.x + rect.width - badge_w - GEAR_BADGE_MARGIN
     y = rect.y + rect.height - badge_h - GEAR_BADGE_MARGIN
 
-    brake_on = cs.brakePressed or cs.brake > GEAR_BADGE_BRAKE_THRESHOLD
-    bg_color = GEAR_BADGE_BRAKE_BG_COLOR if brake_on else GEAR_BADGE_BG_COLOR
+    bg_color = GEAR_BADGE_BRAKE_BG_COLOR if cs.brakeLamp else GEAR_BADGE_BG_COLOR
 
     badge_rect = rl.Rectangle(x, y, badge_w, badge_h)
     rl.draw_rectangle_rounded(badge_rect, 0.35, 8, bg_color)
