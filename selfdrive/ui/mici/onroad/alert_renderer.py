@@ -40,10 +40,11 @@ DASHCAM_BADGE_PADDING_Y = 10
 DASHCAM_BADGE_MARGIN = 28
 DASHCAM_BADGE_TEXT_COLOR = rl.Color(160, 160, 160, 255)
 
-GEAR_BADGE_FONT = 96
-GEAR_BADGE_PADDING_X = 28
-GEAR_BADGE_PADDING_Y = 16
-GEAR_BADGE_MARGIN = 28
+GEAR_BADGE_FONT = 40
+GEAR_BADGE_PADDING_X = 12
+GEAR_BADGE_PADDING_Y = 6
+GEAR_BADGE_MARGIN_X = 21
+GEAR_BADGE_MARGIN_Y = 14
 GEAR_BADGE_TEXT_COLOR = rl.Color(220, 220, 220, 255)
 GEAR_BADGE_BG_COLOR = rl.Color(0, 0, 0, 120)
 GEAR_BADGE_BRAKE_BG_COLOR = rl.Color(200, 0, 0, 180)
@@ -296,8 +297,8 @@ class AlertRenderer(Widget):
     text_size = measure_text_cached(self._font_bold, text, GEAR_BADGE_FONT)
     badge_w = text_size.x + GEAR_BADGE_PADDING_X * 2
     badge_h = text_size.y + GEAR_BADGE_PADDING_Y * 2
-    x = rect.x + rect.width - badge_w - GEAR_BADGE_MARGIN
-    y = rect.y + rect.height - badge_h - GEAR_BADGE_MARGIN
+    x = rect.x + rect.width - badge_w - GEAR_BADGE_MARGIN_X
+    y = rect.y + rect.height - badge_h - GEAR_BADGE_MARGIN_Y
 
     bg_color = GEAR_BADGE_BRAKE_BG_COLOR if cs.brakeLamp else GEAR_BADGE_BG_COLOR
 
