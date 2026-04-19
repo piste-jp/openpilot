@@ -178,6 +178,48 @@ class HudRenderer(Widget):
       self._draw_set_speed(rect)
 
     self._draw_steering_wheel(rect)
+    self._draw_velocity_control_debug(rect)
+
+  def _draw_velocity_control_debug(self, rect: rl.Rectangle) -> None:
+    """Phase-1 debug readout. Only visible when Mazda velocity_control_mode is active."""
+    sm = ui_state.sm
+    if sm.recv_frame["carState"] < ui_state.started_frame:
+      return
+    cs = sm["carState"]
+    if not cs.mazdaVelocityControlMode:
+      return
+
+    plan = sm["longitudinalPlan"]
+    speeds_last_kph = plan.speeds[-1] * CV.MS_TO_KPH if len(plan.speeds) else 0.0
+    source_name = str(plan.longitudinalPlanSource).split(".")[-1]
+    crz_speed_kph = cs.cruiseState.speedCluster * CV.MS_TO_KPH
+
+    lines = [
+      f"V MODE  target {int(round(cs.vCruise))} km/h",
+      f"CRZ     {int(round(crz_speed_kph))} km/h",
+      f"plan v  {speeds_last_kph:5.1f} km/h",
+      f"plan a  {plan.aTarget:+.2f} m/s2",
+      f"src     {source_name}",
+    ]
+
+    font_size = 30
+    line_h = font_size + 6
+    pad = 14
+    box_w = 360
+    box_h = line_h * len(lines) + pad * 2
+    x = int(rect.x + 180)
+    y = int(rect.y + 180)
+
+    rl.draw_rectangle(x, y, box_w, box_h, rl.Color(0, 0, 0, 160))
+    for i, text in enumerate(lines):
+      rl.draw_text_ex(
+        self._font_medium,
+        text,
+        rl.Vector2(x + pad, y + pad + i * line_h),
+        font_size,
+        0,
+        COLORS.WHITE,
+      )
 
   def _draw_steering_wheel(self, rect: rl.Rectangle) -> None:
     wheel_txt = self._txt_wheel_critical if self._show_wheel_critical else self._txt_wheel
