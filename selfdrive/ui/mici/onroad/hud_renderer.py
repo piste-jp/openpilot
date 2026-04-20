@@ -202,13 +202,13 @@ class HudRenderer(Widget):
       f"src     {source_name}",
     ]
 
-    font_size = 30
-    line_h = font_size + 6
-    pad = 14
-    box_w = 360
+    font_size = 24
+    line_h = font_size + 2
+    pad = 8
+    box_w = 280
     box_h = line_h * len(lines) + pad * 2
-    x = int(rect.x + 180)
-    y = int(rect.y + 180)
+    x = int(rect.x + rect.width / 2 - box_w / 2)
+    y = int(rect.y + 6)
 
     rl.draw_rectangle(x, y, box_w, box_h, rl.Color(0, 0, 0, 160))
     for i, text in enumerate(lines):
