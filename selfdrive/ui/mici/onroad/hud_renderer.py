@@ -191,21 +191,18 @@ class HudRenderer(Widget):
 
     plan = sm["longitudinalPlan"]
     speeds_last_kph = plan.speeds[-1] * CV.MS_TO_KPH if len(plan.speeds) else 0.0
-    source_name = str(plan.longitudinalPlanSource).split(".")[-1]
     crz_speed_kph = cs.cruiseState.speedCluster * CV.MS_TO_KPH
 
     lines = [
-      f"V MODE  target {int(round(cs.vCruise))} km/h",
-      f"CRZ     {int(round(crz_speed_kph))} km/h",
-      f"plan v  {speeds_last_kph:5.1f} km/h",
-      f"plan a  {plan.aTarget:+.2f} m/s2",
-      f"src     {source_name}",
+      f"T/C  {int(round(cs.vCruise))} / {int(round(crz_speed_kph))}",
+      f"PV  {speeds_last_kph:.1f}",
+      f"PA {plan.aTarget:+.2f}",
     ]
 
-    font_size = 24
-    line_h = font_size + 2
-    pad = 8
-    box_w = 280
+    font_size = 40
+    line_h = font_size + 4
+    pad = 10
+    box_w = 320
     box_h = line_h * len(lines) + pad * 2
     x = int(rect.x + rect.width / 2 - box_w / 2)
     y = int(rect.y + 6)
