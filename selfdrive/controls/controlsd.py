@@ -155,6 +155,10 @@ class Controls:
     CC.cruiseControl.cancel = CS.cruiseState.enabled and (not CC.enabled or not self.CP.pcmCruise)
     CC.cruiseControl.resume = CC.enabled and CS.cruiseState.standstill and not self.sm['longitudinalPlan'].shouldStop
 
+    # Mazda velocity_control_mode: surface plannerd's 2.5 s horizon target for carcontroller.
+    plan_speeds = self.sm['longitudinalPlan'].speeds
+    CC.mazdaPlanTargetKph = float(plan_speeds[-1] * CV.MS_TO_KPH) if len(plan_speeds) else 0.0
+
     hudControl = CC.hudControl
     hudControl.setSpeed = float(CS.vCruiseCluster * CV.KPH_TO_MS)
     hudControl.speedVisible = CC.enabled
