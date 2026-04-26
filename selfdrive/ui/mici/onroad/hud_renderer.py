@@ -181,7 +181,7 @@ class HudRenderer(Widget):
     self._draw_velocity_control_debug(rect)
 
   def _draw_velocity_control_debug(self, rect: rl.Rectangle) -> None:
-    """Phase-1 debug readout. Only visible when Mazda velocity_control_mode is active."""
+    """Top-right MAX badge while Mazda velocity_control_mode is active."""
     sm = ui_state.sm
     if sm.recv_frame["carState"] < ui_state.started_frame:
       return
@@ -189,34 +189,27 @@ class HudRenderer(Widget):
     if not cs.mazdaVelocityControlMode:
       return
 
-    plan = sm["longitudinalPlan"]
-    speeds_last_kph = plan.speeds[-1] * CV.MS_TO_KPH if len(plan.speeds) else 0.0
-    crz_speed_kph = cs.cruiseState.speedCluster * CV.MS_TO_KPH
+    text = f"MAX: {int(round(cs.vCruise))}"
+    font_size = 48
+    pad_x = 12
+    pad_y = 6
+    text_size = measure_text_cached(self._font_bold, text, font_size)
+    badge_w = text_size.x + pad_x * 2
+    badge_h = text_size.y + pad_y * 2
+    margin_x = 21
+    margin_y = 14
+    x = rect.x + rect.width - badge_w - margin_x
+    y = rect.y + margin_y
 
-    lines = [
-      f"T/C  {int(round(cs.vCruise))} / {int(round(crz_speed_kph))}",
-      f"PV  {speeds_last_kph:.1f}",
-      f"PA {plan.aTarget:+.2f}",
-    ]
-
-    font_size = 40
-    line_h = font_size + 4
-    pad = 10
-    box_w = 320
-    box_h = line_h * len(lines) + pad * 2
-    x = int(rect.x + rect.width / 2 - box_w / 2)
-    y = int(rect.y + 6)
-
-    rl.draw_rectangle(x, y, box_w, box_h, rl.Color(0, 0, 0, 160))
-    for i, text in enumerate(lines):
-      rl.draw_text_ex(
-        self._font_medium,
-        text,
-        rl.Vector2(x + pad, y + pad + i * line_h),
-        font_size,
-        0,
-        COLORS.WHITE,
-      )
+    rl.draw_rectangle_rounded(rl.Rectangle(x, y, badge_w, badge_h), 0.35, 8, rl.Color(0, 0, 0, 120))
+    rl.draw_text_ex(
+      self._font_bold,
+      text,
+      rl.Vector2(x + pad_x, y + pad_y),
+      font_size,
+      0,
+      rl.Color(220, 220, 220, 255),
+    )
 
   def _draw_steering_wheel(self, rect: rl.Rectangle) -> None:
     wheel_txt = self._txt_wheel_critical if self._show_wheel_critical else self._txt_wheel
