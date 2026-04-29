@@ -181,35 +181,48 @@ class HudRenderer(Widget):
     self._draw_velocity_control_debug(rect)
 
   def _draw_velocity_control_debug(self, rect: rl.Rectangle) -> None:
-    """Top-right MAX badge while Mazda velocity_control_mode is active."""
+    """Top-right two-line debug badge for Mazda velocity_control_mode.
+
+    Line 1: 'V' iff velocity_control_mode is active.
+    Line 2: cs.vCruise (plannerd upper-bound target). Hidden when unset.
+    """
     sm = ui_state.sm
     if sm.recv_frame["carState"] < ui_state.started_frame:
       return
     cs = sm["carState"]
-    if not cs.mazdaVelocityControlMode:
+
+    show_v = cs.mazdaVelocityControlMode
+    v_cruise = int(round(cs.vCruise))
+    show_speed = v_cruise != SET_SPEED_NA and v_cruise > 0
+    if not show_v and not show_speed:
       return
 
-    text = f"MAX: {int(round(cs.vCruise))}"
+    line1 = "V" if show_v else ""
+    line2 = str(v_cruise) if show_speed else ""
+
     font_size = 48
     pad_x = 12
     pad_y = 6
-    text_size = measure_text_cached(self._font_bold, text, font_size)
-    badge_w = text_size.x + pad_x * 2
-    badge_h = text_size.y + pad_y * 2
+    line_gap = 4
+    size1 = measure_text_cached(self._font_bold, line1, font_size) if line1 else rl.Vector2(0, 0)
+    size2 = measure_text_cached(self._font_bold, line2, font_size) if line2 else rl.Vector2(0, 0)
+    text_w = max(size1.x, size2.x)
+    text_h = size1.y + (line_gap + size2.y if line2 and line1 else 0) + (size2.y if line2 and not line1 else 0)
+    badge_w = text_w + pad_x * 2
+    badge_h = text_h + pad_y * 2
     margin_x = 21
     margin_y = 14
     x = rect.x + rect.width - badge_w - margin_x
     y = rect.y + margin_y
 
     rl.draw_rectangle_rounded(rl.Rectangle(x, y, badge_w, badge_h), 0.35, 8, rl.Color(0, 0, 0, 120))
-    rl.draw_text_ex(
-      self._font_bold,
-      text,
-      rl.Vector2(x + pad_x, y + pad_y),
-      font_size,
-      0,
-      rl.Color(220, 220, 220, 255),
-    )
+    text_color = rl.Color(220, 220, 220, 255)
+    cy = y + pad_y
+    if line1:
+      rl.draw_text_ex(self._font_bold, line1, rl.Vector2(x + pad_x + (text_w - size1.x) / 2, cy), font_size, 0, text_color)
+      cy += size1.y + line_gap
+    if line2:
+      rl.draw_text_ex(self._font_bold, line2, rl.Vector2(x + pad_x + (text_w - size2.x) / 2, cy), font_size, 0, text_color)
 
   def _draw_steering_wheel(self, rect: rl.Rectangle) -> None:
     wheel_txt = self._txt_wheel_critical if self._show_wheel_critical else self._txt_wheel
