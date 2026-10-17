@@ -290,6 +290,8 @@ class AlertRenderer(Widget):
     if ui_state.sm.recv_frame['carState'] < ui_state.started_frame:
       return
     cs = ui_state.sm['carState']
+    if cs.mazdaCtsMode:
+      return
     gear_step = cs.gearStep
     if gear_step < 1 or gear_step > 6:
       return

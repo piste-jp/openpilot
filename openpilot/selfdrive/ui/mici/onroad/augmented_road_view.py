@@ -239,8 +239,13 @@ class AugmentedRoadView(CameraView):
     # Render the base camera view
     super()._render(self._content_rect)
 
+    # Mazda CTS mode: the stock system drives and openpilot stays out, only show the camera and alerts
+    sm = ui_state.sm
+    stock_cts = sm.recv_frame["carState"] >= ui_state.started_frame and sm["carState"].mazdaCtsMode
+
     # Draw all UI overlays
-    self._model_renderer.render(self._content_rect)
+    if not stock_cts:
+      self._model_renderer.render(self._content_rect)
 
     # Fade out bottom of overlays for looks
     rl.draw_texture_ex(self._fade_texture, rl.Vector2(self._content_rect.x, self._content_rect.y), 0.0, 1.0, rl.WHITE)
@@ -248,17 +253,18 @@ class AugmentedRoadView(CameraView):
     # Hide DMoji when disengaged unless AlwaysOnDM is enabled
     should_draw_dmoji = (not self._hud_renderer.drawing_top_icons() and
                          (ui_state.status != UIStatus.DISENGAGED or ui_state.always_on_dm))
-    self._driver_state_renderer.set_should_draw(should_draw_dmoji)
+    self._driver_state_renderer.set_should_draw(should_draw_dmoji and not stock_cts)
     self._driver_state_renderer.set_position(self._rect.x + 16, self._rect.y + 10)
     self._driver_state_renderer.render()
-    self._long_indicator.set_should_draw(not self._hud_renderer.drawing_top_icons())
+    self._long_indicator.set_should_draw(not self._hud_renderer.drawing_top_icons() and not stock_cts)
     self._long_indicator.render(self._content_rect)
 
     self._hud_renderer.set_can_draw_top_icons(alert_to_render is None)
     self._hud_renderer.set_wheel_critical_icon(alert_to_render is not None and not not_animating_out and
                                                alert_to_render.visual_alert == car.CarControl.HUDControl.VisualAlert.steerRequired)
     self._alert_renderer.render(self._content_rect)
-    self._hud_renderer.render(self._content_rect)
+    if not stock_cts:
+      self._hud_renderer.render(self._content_rect)
 
     # Draw fake rounded border
     rl.draw_rectangle_rounded_lines_ex(self._content_rect, 0.2 * 1.02, 10, 50, rl.BLACK)
@@ -270,7 +276,7 @@ class AugmentedRoadView(CameraView):
     # Use self._content_rect for positioning within camera bounds
     if show_navigation:
       self._navigation.render(rl.Rectangle(self._content_rect.x + self._content_rect.width, self.rect.y, PANEL_WIDTH, self.rect.height))
-    else:
+    elif not stock_cts:
       self._confidence_ball.render(self.rect)
 
     self._bookmark_icon.render(self.rect)
