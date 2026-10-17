@@ -1,6 +1,7 @@
 # Mazda CAN analysis tools
 
-Small scripts used to port the Mazda 6 Wagon 2022 (GJ5FW). They work on local rlogs, so they don't
+Small scripts used to port the Mazda 6 Wagon 2022 (GJ5FW). What each signal turned out to be, and what is
+still open, is tracked in [`signal_tracker.md`](signal_tracker.md). They work on local rlogs, so they don't
 need comma connect and run fine on a Mac with the opendbc venv
 (`opendbc_repo/.venv/bin/python`, with `PYTHONPATH` unset).
 
