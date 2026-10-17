@@ -70,3 +70,13 @@ python changes.py /tmp/logs18b 425,4f7
 For messages that rarely change (body and status messages), prints every payload change with the
 known flags and enums that changed within `--window` seconds of it. This is how the turn signal
 latch in 0x425 and the standstill bits in 0x47b were found.
+
+## Bits that flipped during a stationary procedure
+
+```sh
+python rarebits.py /tmp/logs18f 25 100 6
+```
+
+Lists every bit that changed at most 6 times between 25 s and 100 s, with the times and the DBC signal
+it belongs to. Doing one action every few seconds while parked (lights, A/C, rear defogger, hazards,
+doors) makes each action show up as a group of bits flipping at the same time.
