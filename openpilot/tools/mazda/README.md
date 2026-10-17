@@ -48,3 +48,14 @@ python replay.py diff old.pkl new.pkl
 
 `diff` lists every CarState field and CAN send that differs, with the time ranges where it does.
 An old checkout is easy to get with `git -C opendbc_repo worktree add /tmp/opendbc_old <commit>`.
+
+## Catalog the unknown signals
+
+```sh
+python catalog.py /tmp/logs186 /tmp/logs18b --out unknown_signals.md
+```
+
+Lists every DBC signal whose name doesn't say what it is (and every signal of an unnamed message):
+value range, how often it changes, whether it looks like a flag, enum, counter or value, and which
+known signals it moves with. Messages on the bus that the DBC doesn't have are listed at the end.
+[`unknown_signals.md`](unknown_signals.md) is the catalog of two drives of the Mazda 6 Wagon 2022.
