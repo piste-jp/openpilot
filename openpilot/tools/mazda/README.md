@@ -59,3 +59,13 @@ Lists every DBC signal whose name doesn't say what it is (and every signal of an
 value range, how often it changes, whether it looks like a flag, enum, counter or value, and which
 known signals it moves with. Messages on the bus that the DBC doesn't have are listed at the end.
 [`unknown_signals.md`](unknown_signals.md) is the catalog of two drives of the Mazda 6 Wagon 2022.
+
+## What changed when a message changed
+
+```sh
+python changes.py /tmp/logs18b 425,4f7
+```
+
+For messages that rarely change (body and status messages), prints every payload change with the
+known flags and enums that changed within `--window` seconds of it. This is how the turn signal
+latch in 0x425 and the standstill bits in 0x47b were found.

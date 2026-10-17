@@ -63,6 +63,18 @@
 | NEW_SIGNAL_3 | 55\|8 | value | 0, 1, 2, 3, 4, 5 ... | 0 .. 255 | 561.6 |  |
 | NEW_SIGNAL_1 | 63\|2 | enum | 0, 1, 2, 3 | 0 .. 3 | 423.0 |  |
 
+## MSG_8A (0x8a, 100.1 Hz, 5000+ distinct payloads)
+
+| signal | bits | kind | values | range | changes/min | moves with |
+|---|---|---|---|---|---|---|
+| NEW_SIGNAL_1 | 11\|8 | value | 0, 1, 2, 3, 4, 5 ... | 0 .. 255 | 366.7 |  |
+| NEW_SIGNAL_2 | 27\|2 | enum | 0, 1, 2, 3 | 0 .. 3 | 167.4 | acc set speed +0.31 |
+| NEW_SIGNAL_3 | 35\|4 | value | 0, 1, 2, 3, 4, 5 ... | 0 .. 15 | 212.5 |  |
+| NEW_SIGNAL_4 | 43\|4 | value | 0, 1, 2, 3, 4, 5 ... | 0 .. 15 | 391.8 |  |
+| NEW_SIGNAL_5 | 51\|4 | value | 0, 1, 2, 3, 4, 5 ... | 0 .. 15 | 43.7 |  |
+| NEW_SIGNAL_6 | 55\|2 | enum | 0, 1, 2, 3 | 0 .. 3 | 424.8 |  |
+| NEW_SIGNAL_7 | 63\|4 | value | 0, 1, 2, 3, 4, 5 ... | 0 .. 15 | 362.3 |  |
+
 ## CRZ_BTNS (0x9d, 10.0 Hz, 83 distinct payloads)
 
 | signal | bits | kind | values | range | changes/min | moves with |
@@ -153,6 +165,13 @@
 | START2 | 28\|5 | enum | 0, 1, 2, 6, 8, 14 ... | 0 .. 24 | 0.2 | seatbelt -0.45 |
 | CTR | 39\|4 | value | 0, 1, 2, 3, 4, 5 ... | 0 .. 15 | 565.3 |  |
 | CHKSUM | 47\|8 | value | 0, 2, 3, 4, 8, 9 ... | 0 .. 255 | 565.3 | seatbelt -0.38 |
+
+## MSG_20A (0x20a, 66.7 Hz, 5000+ distinct payloads)
+
+| signal | bits | kind | values | range | changes/min | moves with |
+|---|---|---|---|---|---|---|
+| NEW_SIGNAL_1 | 17\|9 | value | 0, 1, 2, 3, 4, 5 ... | 0 .. 511 | 381.4 |  |
+| NEW_SIGNAL_2 | 39\|1 | flag | 0, 1 | 0 .. 1 | 2.8 | accel x +0.45 |
 
 ## NEW_MSG_36 (0x211, 50.0 Hz, 16 distinct payloads)
 
@@ -397,6 +416,15 @@
 | counter_or_GEAR | 15\|8 | value | 0, 1, 2, 3, 4, 5 ... | 0 .. 254 | 487.6 |  |
 | NEW_SIGNAL_1 | 29\|6 | enum | 51, 52, 53 | 51 .. 53 | 0.3 |  |
 
+## TURN_LAMP_STATUS_MAYBE (0x425, 10.0 Hz, 4 distinct payloads)
+
+| signal | bits | kind | values | range | changes/min | moves with |
+|---|---|---|---|---|---|---|
+| RIGHT_TURN_LAMP_MAYBE | 9\|1 | flag | 0, 1 | 0 .. 1 | 0.0 | coolant temp +0.85, acc on +0.37, acc engaged +0.35 |
+| LEFT_TURN_LAMP_2_MAYBE | 19\|1 | flag | 0, 1 | 0 .. 1 | 0.0 | coolant temp +0.72, seatbelt +0.51, steering angle +0.44 |
+| RIGHT_TURN_LAMP_2_MAYBE | 21\|1 | flag | 0, 1 | 0 .. 1 | 0.0 | coolant temp +0.85, acc on +0.37, acc engaged +0.35 |
+| LEFT_TURN_LAMP_MAYBE | 23\|1 | flag | 0, 1 | 0 .. 1 | 0.0 | coolant temp +0.72, seatbelt +0.51, steering angle +0.44 |
+
 ## NEW_MSG_27 (0x42b, 20.0 Hz, 5000+ distinct payloads)
 
 | signal | bits | kind | values | range | changes/min | moves with |
@@ -463,6 +491,12 @@
 |---|---|---|---|---|---|---|
 | NEW_SIGNAL_1 | 32\|1 | constant | 0 | 0 .. 0 | 0.0 |  |
 
+## MOVING_STATE (0x47b, 10.0 Hz, 8 distinct payloads)
+
+| signal | bits | kind | values | range | changes/min | moves with |
+|---|---|---|---|---|---|---|
+| NEW_SIGNAL_1 | 0\|1 | flag | 0, 1 | 0 .. 1 | 0.7 |  |
+
 ## CAM_SETTINGS (0x485, 0.0 Hz, 1 distinct payloads)
 
 | signal | bits | kind | values | range | changes/min | moves with |
@@ -501,11 +535,28 @@
 |---|---|---|---|---|---|---|
 | TEMPERATURE_MAYBE | 47\|8 | constant | 0 | 0 .. 0 | 0.0 |  |
 
+## MSG_4D9 (0x4d9, 20.0 Hz, 61 distinct payloads)
+
+| signal | bits | kind | values | range | changes/min | moves with |
+|---|---|---|---|---|---|---|
+| CTR | 32\|3 | enum | 1, 2, 3, 4, 5, 6 ... | 1 .. 7 | 519.7 |  |
+| NEW_SIGNAL_1 | 63\|8 | value | 0, 1, 4, 5, 6, 7 ... | 0 .. 19 | 1.4 |  |
+
 ## 2017_3 (0x4db, 10.0 Hz, 3230 distinct payloads)
 
 | signal | bits | kind | values | range | changes/min | moves with |
 |---|---|---|---|---|---|---|
 | NEW_SIGNAL_1 | 7\|64 | value | 7.20576e+16, 7.20576e+16, 7.20576e+16, 7.20576e+16, 7.20576e+16, 7.20576e+16 ... | 7.20576e+16 .. 1.19616e+19 | 517.0 | accel x -0.46 |
+
+## MSG_4DF (0x4df, 1.0 Hz, 62 distinct payloads)
+
+| signal | bits | kind | values | range | changes/min | moves with |
+|---|---|---|---|---|---|---|
+| NEW_SIGNAL_1 | 7\|8 | value | 79, 80, 81, 82, 85, 86 ... | 79 .. 254 | 2.8 |  |
+| NEW_SIGNAL_2 | 23\|8 | enum | 17, 18, 19, 20, 23 | 17 .. 23 | 0.2 | acc on +0.48, acc engaged +0.48, acc set speed +0.45 |
+| NEW_SIGNAL_3 | 31\|2 | enum | 0, 1, 2, 3 | 0 .. 3 | 2.7 |  |
+| TEMPERATURE_SLOW_MAYBE | 47\|8 | value | 159, 160, 161, 162, 163, 164 ... | 159 .. 171 | 1.5 | coolant temp +0.78 |
+| NEW_SIGNAL_4 | 55\|1 | flag | 0, 1 | 0 .. 1 | 3.2 |  |
 
 ## MSG_09 (0x4f2, 8.8 Hz, 97 distinct payloads)
 
@@ -562,15 +613,9 @@
 
 | address | Hz | distinct payloads |
 |---|---|---|
-| 0x8a | 100.1 | 5000+ |
-| 0xfe | 100.0 | 16 |
-| 0x20a | 66.7 | 5000+ |
 | 0x2e0 | 10.0 | 2 |
-| 0x425 | 10.0 | 4 |
 | 0x445 | 5.0 | 1 |
-| 0x454 | 1.0 | 1 |
 | 0x45c | 1.0 | 2 |
-| 0x47b | 10.0 | 8 |
 | 0x48b | 10.0 | 1 |
 | 0x48e | 10.0 | 2 |
 | 0x491 | 33.2 | 1 |
@@ -580,14 +625,9 @@
 | 0x4d4 | 10.0 | 77 |
 | 0x4d5 | 10.0 | 1 |
 | 0x4d7 | 10.0 | 1 |
-| 0x4d9 | 20.0 | 61 |
 | 0x4dc | 10.0 | 1 |
-| 0x4df | 1.0 | 62 |
 | 0x4ec | 1.0 | 1 |
 | 0x4f0 | 1.0 | 1 |
 | 0x4f7 | 5.0 | 12 |
-| 0x581 | 1.0 | 1 |
-| 0x596 | 1.0 | 1 |
-| 0x5a0 | 1.0 | 1 |
 | 0x7e0 | 109.7 | 14 |
 | 0x7e8 | 109.7 | 5000+ |
