@@ -201,7 +201,7 @@ class HudRenderer(Widget):
       return
     cs = sm["carState"]
 
-    show_v = cs.mazdaVelocityControlMode
+    show_v = cs.mazda.velocityControlMode
     v_cruise = int(round(cs.vCruise))
     show_speed = v_cruise != SET_SPEED_NA and v_cruise > 0
     if not show_v and not show_speed:

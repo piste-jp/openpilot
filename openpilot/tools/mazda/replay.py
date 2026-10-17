@@ -13,6 +13,22 @@ from common import can_events, segment_paths
 
 CC_FILE = "cc.pkl"
 
+# Mazda fields before they were grouped into CarState.mazda
+LEGACY_MAZDA_FIELDS = {"gearStep": "gearStep", "brakeLamp": "brakeLamp",
+                       "mazdaVelocityControlMode": "velocityControlMode", "mazdaCtsMode": "ctsMode"}
+
+
+def plan_target_kph(cc) -> float:
+  if hasattr(cc, "mazda"):
+    return cc.mazda.planTargetKph
+  return getattr(cc, "mazdaPlanTargetKph", 0.)
+
+
+def mazda_fields(cs) -> dict:
+  if hasattr(cs, "mazda"):
+    return {k: round(v, 3) if isinstance(v, float) else v for k, v in cs.mazda.to_dict().items()}
+  return {new: getattr(cs, old) for old, new in LEGACY_MAZDA_FIELDS.items() if hasattr(cs, old)}
+
 
 def extract_cc(args):
   """Decode carControl with the schema the drive was recorded with, one entry per CAN event."""
@@ -43,7 +59,7 @@ def extract_cc(args):
         cc = {
           "enabled": c.enabled, "latActive": c.latActive, "torque": c.actuators.torque,
           "cancel": c.cruiseControl.cancel, "resume": c.cruiseControl.resume,
-          "visualAlert": str(c.hudControl.visualAlert), "mazdaPlanTargetKph": getattr(c, "mazdaPlanTargetKph", 0.),
+          "visualAlert": str(c.hudControl.visualAlert), "planTargetKph": plan_target_kph(c),
         }
       elif which == "can":
         cc_log.append(cc)
@@ -65,8 +81,7 @@ def run(args):
   CP = CarInterface.get_params(args.platform, {0: {}, 1: {}, 2: {}}, [], False, False, False)
   CI = CarInterface(CP)
 
-  cs_fields = ["gearStep", "brakeLamp", "mazdaVelocityControlMode", "mazdaCtsMode", "steerFaultTemporary",
-               "steerFaultPermanent", "invalidLkasSetting", "lowSpeedAlert"]
+  cs_fields = ["steerFaultTemporary", "steerFaultPermanent", "invalidLkasSetting", "lowSpeedAlert"]
   rows = []
   for i, (t, ev) in enumerate(can_events(args.logdir)):
     cs = CI.update([(ev.logMonoTime, [CanData(m.address, bytes(m.dat), m.src) for m in ev.can])])
@@ -81,12 +96,15 @@ def run(args):
       cc.cruiseControl.cancel = d["cancel"]
       cc.cruiseControl.resume = d["resume"]
       cc.hudControl.visualAlert = d["visualAlert"]
-      if hasattr(cc, "mazdaPlanTargetKph"):
-        cc.mazdaPlanTargetKph = d["mazdaPlanTargetKph"]
+      if hasattr(cc, "mazda"):
+        cc.mazda.planTargetKph = d["planTargetKph"]
+      elif hasattr(cc, "mazdaPlanTargetKph"):
+        cc.mazdaPlanTargetKph = d["planTargetKph"]
       _, sends = CI.apply(cc.as_reader(), ev.logMonoTime)
 
     # fields this checkout's car.capnp doesn't have are left out
     row = {f: getattr(cs, f) for f in cs_fields if hasattr(cs, f)}
+    row.update({f"mazda.{k}": v for k, v in mazda_fields(cs).items()})
     cruise = cs.cruiseState
     row.update(available=cruise.available, enabled=cruise.enabled, speed=round(cruise.speed, 4),
                speedCluster=round(cruise.speedCluster, 4),

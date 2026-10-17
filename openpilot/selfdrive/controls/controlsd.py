@@ -164,7 +164,7 @@ class Controls:
 
     # Mazda velocity_control_mode: surface plannerd's 2.5 s horizon target for carcontroller.
     plan_speeds = self.sm['longitudinalPlan'].speeds
-    CC.mazdaPlanTargetKph = float(plan_speeds[-1] * CV.MS_TO_KPH) if len(plan_speeds) else 0.0
+    CC.mazda.planTargetKph = float(plan_speeds[-1] * CV.MS_TO_KPH) if len(plan_speeds) else 0.0
 
     hudControl = CC.hudControl
     hudControl.setSpeed = float(CS.vCruiseCluster * CV.KPH_TO_MS)

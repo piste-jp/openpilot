@@ -241,7 +241,7 @@ class AugmentedRoadView(CameraView):
 
     # Mazda CTS mode: the stock system drives and openpilot stays out, only show the camera and alerts
     sm = ui_state.sm
-    stock_cts = sm.recv_frame["carState"] >= ui_state.started_frame and sm["carState"].mazdaCtsMode
+    stock_cts = sm.recv_frame["carState"] >= ui_state.started_frame and sm["carState"].mazda.ctsMode
 
     # Draw all UI overlays
     if not stock_cts:

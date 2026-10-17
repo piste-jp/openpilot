@@ -290,9 +290,9 @@ class AlertRenderer(Widget):
     if ui_state.sm.recv_frame['carState'] < ui_state.started_frame:
       return
     cs = ui_state.sm['carState']
-    if cs.mazdaCtsMode:
+    if cs.mazda.ctsMode:
       return
-    gear_step = cs.gearStep
+    gear_step = cs.mazda.gearStep
     if gear_step < 1 or gear_step > 6:
       return
 
@@ -303,7 +303,7 @@ class AlertRenderer(Widget):
     x = rect.x + rect.width - badge_w - GEAR_BADGE_MARGIN_X
     y = rect.y + rect.height - badge_h - GEAR_BADGE_MARGIN_Y
 
-    bg_color = GEAR_BADGE_BRAKE_BG_COLOR if cs.brakeLamp else GEAR_BADGE_BG_COLOR
+    bg_color = GEAR_BADGE_BRAKE_BG_COLOR if cs.mazda.brakeLamp else GEAR_BADGE_BG_COLOR
 
     badge_rect = rl.Rectangle(x, y, badge_w, badge_h)
     rl.draw_rectangle_rounded(badge_rect, 0.35, 8, bg_color)
