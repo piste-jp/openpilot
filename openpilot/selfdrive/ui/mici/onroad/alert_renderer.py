@@ -11,6 +11,7 @@ from openpilot.selfdrive.ui.ui_state import ui_state
 from openpilot.common.filter_simple import BounceFilter, FirstOrderFilter
 from openpilot.common.hardware import COMMA_HARDWARE
 from openpilot.system.ui.lib.application import gui_app, FontWeight, TextAlignment
+from openpilot.system.ui.lib.text_measure import measure_text_cached
 from openpilot.system.ui.widgets import Widget
 from openpilot.system.ui.widgets.label import UnifiedLabel
 
@@ -33,6 +34,21 @@ ALERT_COLORS = {
 }
 
 TURN_SIGNAL_BLINK_PERIOD = 1 / (80 / 60)  # Mazda heartbeat turn signal BPM
+
+DASHCAM_BADGE_FONT = 36
+DASHCAM_BADGE_PADDING_X = 16
+DASHCAM_BADGE_PADDING_Y = 10
+DASHCAM_BADGE_MARGIN = 28
+DASHCAM_BADGE_TEXT_COLOR = rl.Color(160, 160, 160, 255)
+
+GEAR_BADGE_FONT = 48
+GEAR_BADGE_PADDING_X = 12
+GEAR_BADGE_PADDING_Y = 6
+GEAR_BADGE_MARGIN_X = 21
+GEAR_BADGE_MARGIN_Y = 14
+GEAR_BADGE_TEXT_COLOR = rl.Color(220, 220, 220, 255)
+GEAR_BADGE_BG_COLOR = rl.Color(0, 0, 0, 120)
+GEAR_BADGE_BRAKE_BG_COLOR = rl.Color(200, 0, 0, 180)
 
 DEBUG = False
 
@@ -108,6 +124,8 @@ class AlertRenderer(Widget):
     self._turn_signal_timer = 0.0
     self._turn_signal_alpha_filter = FirstOrderFilter(0.0, 0.3, 1 / gui_app.target_fps)
     self._last_icon_side: IconSide | None = None
+
+    self._font_bold: rl.Font = gui_app.font(FontWeight.BOLD)
 
     self._load_icons()
 
@@ -217,6 +235,8 @@ class AlertRenderer(Widget):
     return AlertLayout(text_rect, icon_layout)
 
   def _render(self, rect: rl.Rectangle) -> bool:
+    self._draw_gear_badge(rect)
+
     alert = self.get_alert(ui_state.sm)
 
     # Animate fade and slide in/out
@@ -231,6 +251,11 @@ class AlertRenderer(Widget):
         self._prev_alert = None
         return False
 
+    if self._is_dashcam_alert(alert):
+      # Replace the dashcam alert with a compact badge in the bottom-right corner.
+      self._draw_dashcam_badge(rect, alert)
+      return True
+
     self._draw_background(alert)
 
     alert_layout = self._icon_helper(alert)
@@ -238,6 +263,56 @@ class AlertRenderer(Widget):
     self._draw_icons(alert_layout)
 
     return True
+
+  def _is_dashcam_alert(self, alert: Alert) -> bool:
+    return "dashcam" in alert.text1.lower()
+
+  def _draw_dashcam_badge(self, rect: rl.Rectangle, alert: Alert) -> None:
+    text = alert.text1.lower()
+    text_size = measure_text_cached(self._font_bold, text, DASHCAM_BADGE_FONT)
+    badge_w = text_size.x + DASHCAM_BADGE_PADDING_X * 2
+    badge_h = text_size.y + DASHCAM_BADGE_PADDING_Y * 2
+    x = rect.x + rect.width - badge_w - DASHCAM_BADGE_MARGIN
+    y = rect.y + rect.height - badge_h - DASHCAM_BADGE_MARGIN
+
+    badge_rect = rl.Rectangle(x, y, badge_w, badge_h)
+    rl.draw_rectangle_rounded(badge_rect, 0.35, 8, ALERT_COLORS[AlertStatus.normal])
+    rl.draw_text_ex(
+      self._font_bold,
+      text,
+      rl.Vector2(x + DASHCAM_BADGE_PADDING_X, y + DASHCAM_BADGE_PADDING_Y),
+      DASHCAM_BADGE_FONT,
+      0,
+      DASHCAM_BADGE_TEXT_COLOR,
+    )
+
+  def _draw_gear_badge(self, rect: rl.Rectangle) -> None:
+    if ui_state.sm.recv_frame['carState'] < ui_state.started_frame:
+      return
+    cs = ui_state.sm['carState']
+    gear_step = cs.gearStep
+    if gear_step < 1 or gear_step > 6:
+      return
+
+    text = str(gear_step)
+    text_size = measure_text_cached(self._font_bold, text, GEAR_BADGE_FONT)
+    badge_w = text_size.x + GEAR_BADGE_PADDING_X * 2
+    badge_h = text_size.y + GEAR_BADGE_PADDING_Y * 2
+    x = rect.x + rect.width - badge_w - GEAR_BADGE_MARGIN_X
+    y = rect.y + rect.height - badge_h - GEAR_BADGE_MARGIN_Y
+
+    bg_color = GEAR_BADGE_BRAKE_BG_COLOR if cs.brakeLamp else GEAR_BADGE_BG_COLOR
+
+    badge_rect = rl.Rectangle(x, y, badge_w, badge_h)
+    rl.draw_rectangle_rounded(badge_rect, 0.35, 8, bg_color)
+    rl.draw_text_ex(
+      self._font_bold,
+      text,
+      rl.Vector2(x + GEAR_BADGE_PADDING_X, y + GEAR_BADGE_PADDING_Y),
+      GEAR_BADGE_FONT,
+      0,
+      GEAR_BADGE_TEXT_COLOR,
+    )
 
   def _draw_icons(self, alert_layout: AlertLayout) -> None:
     if alert_layout.icon is None:
