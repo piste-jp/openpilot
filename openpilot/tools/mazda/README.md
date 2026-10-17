@@ -1,0 +1,50 @@
+# Mazda CAN analysis tools
+
+Small scripts used to port the Mazda 6 Wagon 2022 (GJ5FW). They work on local rlogs, so they don't
+need comma connect and run fine on a Mac with the opendbc venv
+(`opendbc_repo/.venv/bin/python`, with `PYTHONPATH` unset).
+
+## Get the logs
+
+```sh
+./fetch_route.sh 0000018b--91b661fef8 /tmp/logs18b          # from `ssh comma4` by default
+./fetch_route.sh 0000018b--91b661fef8 /tmp/logs18b mydevice  # or another ssh host
+```
+
+Segments land as `rlog_<n>.zst`. All scripts below take that directory.
+
+## Timeline of the stock ACC
+
+```sh
+python timeline.py /tmp/logs18b
+```
+
+Prints a line whenever the stock ACC state (available / engaged / CTS mode) changes or a steering
+wheel button is pressed, with the time in seconds since the start of the route. Use it to find the
+time windows of the states you want to compare.
+
+## Find the bits that tell two states apart
+
+```sh
+python findbits.py /tmp/logs18b --a 141.8-143.6,169.8-171.6 --b 162.1-163.7,166.0-169.8
+```
+
+Checks every bit of every message on bus 0 and 2, and prints the ones that are (almost) always one
+value inside the `--a` windows and the other value inside the `--b` windows. This is how
+`CRZ_INFO.CTS_MODE` was found. `--margin` trims each window to skip the transition itself.
+
+## Compare two versions of the car code on a real drive
+
+```sh
+# carControl from the log, decoded with the car.capnp the drive was recorded with
+python replay.py extract-cc /tmp/logs186 --car-capnp /path/to/old/opendbc/car/car.capnp
+
+# run CarState + CarController of two opendbc checkouts on the same CAN and carControl
+python replay.py run /tmp/logs186 --opendbc /path/to/old/opendbc_repo --platform MAZDA_6 --out old.pkl
+python replay.py run /tmp/logs186 --opendbc ../../../opendbc_repo --platform MAZDA_6_WAGON_2022 --out new.pkl
+
+python replay.py diff old.pkl new.pkl
+```
+
+`diff` lists every CarState field and CAN send that differs, with the time ranges where it does.
+An old checkout is easy to get with `git -C opendbc_repo worktree add /tmp/opendbc_old <commit>`.
